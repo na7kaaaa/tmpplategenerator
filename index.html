@@ -137,8 +137,16 @@
     flex:1;
     height:100vh;
     overflow-y:auto;
+    overflow-x:auto;
     background:#3a4048;
     padding:24px;
+  }
+  #scrollHint{
+    display:none;
+    color:#dcd9c8;
+    font-size:12px;
+    text-align:center;
+    padding:6px 0 12px;
   }
   .page{
     background:var(--paper);
@@ -210,18 +218,40 @@
 
   @media print{
     #controls{display:none;}
+    body{ display:block; }
     #viewer{
+      display:block;
       background:#fff;
       padding:0;
       overflow:visible;
       height:auto;
     }
+    #pages{ display:block; }
     .page{
       box-shadow:none;
       margin:0;
       page-break-after:always;
+      break-after:page;
     }
     @page{ size:A4; margin:0; }
+  }
+
+  @media screen and (max-width:820px){
+    body{ flex-direction:column; }
+    #controls{
+      width:100%;
+      min-width:0;
+      height:auto;
+      max-height:60vh;
+      border-right:none;
+      border-bottom:1px solid var(--line);
+    }
+    #viewer{
+      height:auto;
+      min-height:60vh;
+      overflow-x:auto;
+    }
+    #scrollHint{ display:block; }
   }
 </style>
 </head>
@@ -275,7 +305,10 @@
   <div id="stats"></div>
 </div>
 
-<div id="viewer"></div>
+<div id="viewer">
+  <div id="scrollHint">← 横にスクロールすると原稿全体が見られます →</div>
+  <div id="pages"></div>
+</div>
 
 <script>
 // ---- 文字セット定義 ----
@@ -369,7 +402,8 @@ function render(){
   const fontSize = cellSize * 0.62;
 
   const viewer = document.getElementById("viewer");
-  viewer.innerHTML = "";
+  const pagesEl = document.getElementById("pages");
+  pagesEl.innerHTML = "";
 
   for(let p=0; p<pageCount; p++){
     const page = document.createElement("div");
@@ -418,12 +452,12 @@ function render(){
       grid.appendChild(cell);
     }
     page.appendChild(grid);
-    viewer.appendChild(page);
 
     const credit = document.createElement("div");
     credit.className = "credit";
     credit.textContent = "@nakoto_otanotion";
     page.appendChild(credit);
+    pagesEl.appendChild(page);
   }
 
   const statsEl = document.getElementById("stats");
@@ -432,7 +466,7 @@ function render(){
   statsEl.classList.remove("flash");
   void statsEl.offsetWidth; // reflow でアニメーションを再トリガー
   statsEl.classList.add("flash");
-  document.getElementById("viewer").scrollTo({top:0, behavior:"smooth"});
+  try{ viewer.scrollTo({top:0, left:0, behavior:"smooth"}); }catch(e){ viewer.scrollTop = 0; }
 }
 
 document.getElementById("generate").addEventListener("click", render);
