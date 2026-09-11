@@ -125,6 +125,13 @@
     color:#8b94a1;
     margin-top:10px;
     line-height:1.6;
+    border-left:2px solid transparent;
+    padding-left:8px;
+    transition:border-color .15s, color .15s;
+  }
+  #stats.flash{
+    border-left-color:var(--accent-soft);
+    color:#fff;
   }
   #viewer{
     flex:1;
@@ -191,6 +198,15 @@
   .tombo.tr{top:6mm;right:6mm;}
   .tombo.bl{bottom:6mm;left:6mm;}
   .tombo.br{bottom:6mm;right:6mm;}
+  .credit{
+    position:absolute;
+    bottom:3mm;
+    right:6mm;
+    font-size:7px;
+    color:#bbb;
+    font-family:sans-serif;
+    letter-spacing:.02em;
+  }
 
   @media print{
     #controls{display:none;}
@@ -403,10 +419,20 @@ function render(){
     }
     page.appendChild(grid);
     viewer.appendChild(page);
+
+    const credit = document.createElement("div");
+    credit.className = "credit";
+    credit.textContent = "@nakoto_otanotion";
+    page.appendChild(credit);
   }
 
-  document.getElementById("stats").textContent =
-    `文字数: ${list.length} / 1ページ ${perPage}マス / 全 ${pageCount} ページ`;
+  const statsEl = document.getElementById("stats");
+  statsEl.textContent =
+    `文字数: ${list.length} / 1ページ ${perPage}マス / 全 ${pageCount} ページ（生成しました ✓）`;
+  statsEl.classList.remove("flash");
+  void statsEl.offsetWidth; // reflow でアニメーションを再トリガー
+  statsEl.classList.add("flash");
+  document.getElementById("viewer").scrollTo({top:0, behavior:"smooth"});
 }
 
 document.getElementById("generate").addEventListener("click", render);
